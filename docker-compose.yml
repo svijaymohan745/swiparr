@@ -1,0 +1,15 @@
+version: '3'
+services:
+  swiparr:
+    build: .
+    container_name: swiparr
+    restart: unless-stopped
+    environment:
+      - JELLYFIN_URL=http://watch.messerstudios.dev
+      - AUTHORS_SECRET=long_random_string_here
+      - DATABASE_URL=file:/data/swiparr.db
+    volumes:
+      # Map the container data folder to host to save the DB file
+      - ./swiparr-data:/data
+    ports:
+      - 3000:3000
