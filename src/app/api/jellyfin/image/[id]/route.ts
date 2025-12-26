@@ -6,15 +6,12 @@ import { getJellyfinUrl } from "@/lib/jellyfin/api";
 import { sessionOptions } from "@/lib/session";
 import { SessionData } from "@/types/swiparr";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
   const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
   if (!session.isLoggedIn) return new NextResponse("Unauthorized", { status: 401 });
 
-  const { id } = await params;
+  const { id } = await params; // Notice the 'await' here
   const imageUrl = getJellyfinUrl(`/Items/${id}/Images/Primary`);
 
   try {

@@ -6,15 +6,13 @@ import { cookies } from "next/headers";
 import axios from "axios";
 import { SessionData } from "@/types/swiparr";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+
   const cookieStore = await cookies();
   const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
   if (!session.isLoggedIn) return new NextResponse("Unauthorized", { status: 401 });
 
-  const { id } = await params;
+  const { id } = await params; // Notice the 'await' here
 
   try {
     const jellyfinRes = await axios.get(getJellyfinUrl(`/Users/${session.user.Id}/Items/${id}`), {
