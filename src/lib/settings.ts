@@ -19,7 +19,7 @@ function getDefaultSettings(): Settings {
   const rc = getRuntimeConfig();
   return {
     useWatchlist: rc.provider === ProviderType.JELLYFIN && rc.useWatchlist,
-    allowGuestLending: false,
+    allowGuestLending: true,
     hasDismissedGuestLendingAlert: false,
   };
 }

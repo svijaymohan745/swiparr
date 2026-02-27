@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  swiparr:
+    image: ghcr.io/svijaymohan745/swiparr:latest
+    container_name: swiparr
+    restart: unless-stopped
+
+    environment:
+      - JELLYFIN_URL=http://192.168.2.54:1000
+      - JELLYFIN_PUBLIC_URL=https://media.hulksmash.ca
+      - JELLYFIN_USE_WATCHLIST=true
+      - ADMIN_USERNAME=vj
+      - USE_SECURE_COOKIES=false
+      - AUTH_SECRET=REPLACE_THIS_WITH_A_RANDOM_32+_CHAR_STRING_1234567890abcdef
+      - WIZARR_URL=http://YOUR_WIZARR_IP_OR_URL_HERE:5690
+      - WIZARR_API_KEY=pXMCLq6QRluToWXwNRaz1epkEYdQdt6JRMVkV2dxV9M
+
+    volumes:
+      - /opt/docker/swiparr/data:/app/data
+
+    ports:
+      - "4321:4321"

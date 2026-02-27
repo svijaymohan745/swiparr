@@ -203,9 +203,9 @@ export function AuthView({
         ) : (
           <form onSubmit={handleLogin} className="space-y-3">
             <CardDescription>
-              {isPlex 
+              {isPlex
                 ? 'Sign in to link with your Plex account'
-                : `Enter your ${providerName} credentials`
+                : `Enter your H-TV credentials`
               }
             </CardDescription>
 
@@ -215,8 +215,8 @@ export function AuthView({
                   provider === ProviderType.JELLYFIN
                     ? "Jellyfin Server URL"
                     : provider === ProviderType.EMBY
-                    ? "Emby Server URL"
-                    : "Plex Server URL (optional)"
+                      ? "Emby Server URL"
+                      : "Plex Server URL (optional)"
                 }
                 value={serverUrl}
                 onChange={(e) => setServerUrl(e.target.value)}
@@ -278,7 +278,7 @@ export function AuthView({
             )}
             {isExperimental && (
               <Alert className="max-w-full mt-2 ">
-                <AlertTriangleIcon className="text-amber-600!"/>
+                <AlertTriangleIcon className="text-amber-600!" />
                 <AlertTitle className="whitespace-nowrap">Experimental provider integration</AlertTitle>
                 <AlertDescription className="text-xs">
                   Certain features may not work as expected.
@@ -291,9 +291,9 @@ export function AuthView({
       <TabsContent value="join" className="space-y-5">
         <form onSubmit={handleGuestLogin} className="space-y-3">
           <div className="flex justify-center pb-2">
-            <ProfilePicturePicker 
-                userName={guestName || "G"} 
-                onImageSelected={onProfilePictureChange}
+            <ProfilePicturePicker
+              userName={guestName || "G"}
+              onImageSelected={onProfilePictureChange}
             />
           </div>
           <CardDescription>Enter a display name {!sessionCodeParam ? 'and code' : ''} to continue</CardDescription>

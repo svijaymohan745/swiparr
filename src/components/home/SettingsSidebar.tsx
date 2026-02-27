@@ -37,9 +37,6 @@ import { GeneralSettings } from "./settings/GeneralSettings";
 import { StreamingSettings } from "./settings/StreamingSettings";
 import { DangerZone } from "./settings/DangerZone";
 import { useSession } from "@/hooks/api";
-import { Footer } from "../Footer";
-
-
 export function SettingsSidebar() {
     const router = useRouter();
     const [showClearDialog, setShowClearDialog] = useState(false);
@@ -113,7 +110,6 @@ export function SettingsSidebar() {
                                 onClearData={() => setShowClearDialog(true)}
                                 onLogout={handleLogout}
                             />
-                            <Footer/>
                         </div>
                     </ScrollArea>
                 </SheetContent>
