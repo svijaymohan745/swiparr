@@ -50,28 +50,23 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
   };
 
   const [showWizarrDialog, setShowWizarrDialog] = React.useState(false);
-  const [wizEmail, setWizEmail] = React.useState("");
-  const [wizUsername, setWizUsername] = React.useState("");
-  const [wizPassword, setWizPassword] = React.useState("");
   const [wizLoading, setWizLoading] = React.useState(false);
-  const [wizSuccess, setWizSuccess] = React.useState<{ username: string, url: string } | null>(null);
+  const [wizSuccess, setWizSuccess] = React.useState<{ url: string } | null>(null);
   const [wizError, setWizError] = React.useState("");
 
-  const handleWizarrSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleWizarrSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setWizLoading(true);
     setWizError("");
     try {
       const res = await fetch("/api/wizarr", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: wizEmail, username: wizUsername, password: wizPassword })
       });
       const data = await res.json();
       if (!res.ok || data.error) {
-        setWizError(data.error || "Failed to create account");
+        setWizError(data.error || "Failed to generate invitation");
       } else {
-        setWizSuccess({ username: wizUsername, url: runtimeServerUrl || "" });
+        setWizSuccess({ url: data.link });
       }
     } catch (err: any) {
       setWizError(err.message || "An error occurred");
@@ -414,10 +409,10 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
       }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{wizSuccess ? "Account Created!" : "Get Jellyfin Access"}</DialogTitle>
+            <DialogTitle>{wizSuccess ? "Invitation Generated!" : "Get Jellyfin Access"}</DialogTitle>
             <DialogDescription>
               {wizSuccess
-                ? "Your temporary guest account (valid for 2 days) has been created successfully."
+                ? "Your invitation link has been generated. Click the link below to create your 2-day guest account on the portal."
                 : "Create a temporary guest account to watch movies. This account will expire in 2 days and does not include download privileges."}
             </DialogDescription>
           </DialogHeader>
@@ -425,36 +420,37 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
           {wizSuccess ? (
             <div className="space-y-4 py-4">
               <div className="rounded-lg border bg-muted p-4">
-                <div className="font-semibold mb-2">Your Credentials</div>
-                <div className="text-sm"><span className="text-muted-foreground mr-2">Username:</span> {wizSuccess.username}</div>
-                <div className="text-sm"><span className="text-muted-foreground mr-2">Server URL:</span> <a href={wizSuccess.url} target="_blank" className="text-primary underline">{wizSuccess.url}</a></div>
+                <div className="font-semibold mb-2">Your Invite Link</div>
+                <div className="text-sm">
+                  <a href={wizSuccess.url} target="_blank" className="text-primary font-bold hover:underline break-all">
+                    {wizSuccess.url}
+                  </a>
+                </div>
               </div>
-              <Button className="w-full" onClick={() => setShowWizarrDialog(false)}>Close</Button>
+              <DialogFooter className="mt-6 flex flex-row justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setShowWizarrDialog(false)}>Cancel</Button>
+                <a href={wizSuccess.url} target="_blank" rel="noreferrer">
+                  <Button onClick={() => setShowWizarrDialog(false)}>Open Portal</Button>
+                </a>
+              </DialogFooter>
             </div>
           ) : (
-            <form onSubmit={handleWizarrSubmit} className="space-y-4 py-4">
+            <div className="space-y-4 py-4">
               {wizError && (
                 <div className="text-sm text-destructive font-medium p-2 bg-destructive/10 rounded">
                   {wizError}
                 </div>
               )}
-              <div className="space-y-2">
-                <Label htmlFor="wiz-email">Email</Label>
-                <Input id="wiz-email" type="email" required value={wizEmail} onChange={e => setWizEmail(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="wiz-username">Username</Label>
-                <Input id="wiz-username" type="text" required value={wizUsername} onChange={e => setWizUsername(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="wiz-password">Password</Label>
-                <PasswordInput value={wizPassword} onChange={e => setWizPassword(e.target.value)} />
-              </div>
-              <DialogFooter className="mt-6">
+              <p className="text-sm text-foreground/80 pb-4">
+                Click the button below to generate a unique invitation link. You will be redirected to the account registration portal.
+              </p>
+              <DialogFooter className="mt-6 flex flex-row justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setShowWizarrDialog(false)}>Cancel</Button>
-                <Button type="submit" disabled={wizLoading}>{wizLoading ? "Creating..." : "Create Account"}</Button>
+                <Button onClick={() => handleWizarrSubmit()} disabled={wizLoading}>
+                  {wizLoading ? "Generating..." : "Generate Invite Link"}
+                </Button>
               </DialogFooter>
-            </form>
+            </div>
           )}
         </DialogContent>
       </Dialog>
