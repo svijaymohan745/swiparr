@@ -12,8 +12,26 @@ export async function POST(req: Request) {
       );
     }
 
-    // Step 1: Create a 2-day invitation via Wizarr API
-    // Wizarr V3 uses X-API-Key
+    // Step 1: Fetch servers to get server_ids
+    const serversRes = await fetch(`${wizarrUrl.replace(/\/$/, '')}/api/servers`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': wizarrApiKey
+      },
+    });
+
+    if (!serversRes.ok) {
+      const errText = await serversRes.text();
+      console.error("Wizarr Servers Error:", errText);
+      return NextResponse.json({ error: `Failed to fetch Wizarr servers: ${serversRes.statusText}` }, { status: serversRes.status });
+    }
+
+    const serversData = await serversRes.json();
+    const serverIds = (serversData.servers || []).map((s: any) => s.id);
+
+    // Step 2: Create a 2-day invitation via Wizarr API
+    // Wizarr V3 uses X-API-Key and explicitly requires server_ids
     const invRes = await fetch(`${wizarrUrl.replace(/\/$/, '')}/api/invitations`, {
       method: 'POST',
       headers: {
@@ -22,6 +40,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         duration: "2 days",
+        server_ids: serverIds,
       })
     });
 
