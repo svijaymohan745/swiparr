@@ -40,7 +40,7 @@ export function WizarrAccessButton({ className, variant, size, children, ...prop
                 {...props}
             >
                 <ShieldCheck className="w-4 h-4 mr-2" />
-                {children || "Get Jellyfin Access"}
+                {children || "Get H-TV Access"}
             </Button>
 
             <Dialog open={showWizarrDialog} onOpenChange={(open: boolean) => {
@@ -52,7 +52,7 @@ export function WizarrAccessButton({ className, variant, size, children, ...prop
             }}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{wizSuccess ? "Invitation Generated!" : "Get Jellyfin Access"}</DialogTitle>
+                        <DialogTitle>{wizSuccess ? "Invitation Generated!" : "Get H-TV Access"}</DialogTitle>
                         <DialogDescription>
                             {wizSuccess
                                 ? "Your invitation link has been generated. Click the link below to create your 2-day guest account on the portal."
