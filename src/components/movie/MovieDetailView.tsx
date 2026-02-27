@@ -11,6 +11,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Drawer, DrawerContent, DrawerTitle } from "../ui/drawer";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useRuntimeConfig } from "@/lib/runtime-config";
@@ -43,6 +47,37 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
   // Handle scroll event manually to update the motion value
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     scrollY.set(e.currentTarget.scrollTop);
+  };
+
+  const [showWizarrDialog, setShowWizarrDialog] = React.useState(false);
+  const [wizEmail, setWizEmail] = React.useState("");
+  const [wizUsername, setWizUsername] = React.useState("");
+  const [wizPassword, setWizPassword] = React.useState("");
+  const [wizLoading, setWizLoading] = React.useState(false);
+  const [wizSuccess, setWizSuccess] = React.useState<{ username: string, url: string } | null>(null);
+  const [wizError, setWizError] = React.useState("");
+
+  const handleWizarrSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setWizLoading(true);
+    setWizError("");
+    try {
+      const res = await fetch("/api/wizarr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: wizEmail, username: wizUsername, password: wizPassword })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setWizError(data.error || "Failed to create account");
+      } else {
+        setWizSuccess({ username: wizUsername, url: runtimeServerUrl || "" });
+      }
+    } catch (err: any) {
+      setWizError(err.message || "An error occurred");
+    } finally {
+      setWizLoading(false);
+    }
   };
 
   const { data: movie, isLoading } = useQuery({
@@ -149,7 +184,7 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
                 {/* Header Content */}
                 <div className="absolute bottom-4 left-4 right-4 flex items-end gap-3">
                   <OptimizedImage
-                    src={movie.ImageTags?.Primary 
+                    src={movie.ImageTags?.Primary
                       ? `/api/media/image/${movie.Id}?tag=${movie.ImageTags?.Primary}`
                       : `/api/media/image/${movie.Id}?imageType=Primary`
                     }
@@ -186,7 +221,7 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
                       )}
                       {!!movie.OfficialRating && (
                         <Badge variant="outline" className="text-[10px]/0 py-0 h-4 border-foreground/30 text-foreground/80">
-                          <ShieldCheck className="w-3 h-3"/>
+                          <ShieldCheck className="w-3 h-3" />
                           {movie.OfficialRating}
                         </Badge>
                       )}
@@ -222,10 +257,10 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
                       </Button>
                     </Link>
                   ) : (
-                    <Link 
-                      href={`${TMDB_MOVIE_BASE_URL}/${movie.Id}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                    <Link
+                      href={`${TMDB_MOVIE_BASE_URL}/${movie.Id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="w-32"
                     >
                       <Button className="w-32" size="lg">
@@ -246,6 +281,11 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
                         : <Star className={cn("w-4 h-4 mr-2", isInList && "fill-foreground")} />
                       }
                       {useWatchlist ? "Watchlist" : "Favorite"}
+                    </Button>
+                  )}
+                  {isGuest && (
+                    <Button className="w-48" size="lg" onClick={() => setShowWizarrDialog(true)}>
+                      <ShieldCheck className="w-4 h-4 mr-2" /> Get Jellyfin Access
                     </Button>
                   )}
                   {isLikedByMe && <Button
@@ -298,30 +338,30 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
 
 
                 {/* DETAILS ROW */}
-                  <div className="grid grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-2 gap-8 mb-8">
+                  <div>
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Director</h3>
+                    <div className="text-foreground font-medium">
+                      {movie.People?.find(p => p.Type === "Director")?.Name || "Unknown"}
+                    </div>
+                  </div>
+                  {!!languageLabel && (
                     <div>
-                      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Director</h3>
-                      <div className="text-foreground font-medium">
-                        {movie.People?.find(p => p.Type === "Director")?.Name || "Unknown"}
+                      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Language</h3>
+                      <div className="text-foreground font-medium truncate">
+                        {languageLabel}
                       </div>
                     </div>
-                    {!!languageLabel && (
-                      <div>
-                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Language</h3>
-                        <div className="text-foreground font-medium truncate">
-                          {languageLabel}
-                        </div>
+                  )}
+                  {movie.Studios && movie.Studios.length > 0 && (
+                    <div>
+                      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Studio</h3>
+                      <div className="text-foreground font-medium truncate">
+                        {movie.Studios[0].Name}
                       </div>
-                    )}
-                    {movie.Studios && movie.Studios.length > 0 && (
-                      <div>
-                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Studio</h3>
-                        <div className="text-foreground font-medium truncate">
-                          {movie.Studios[0].Name}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* SYNOPSIS */}
                 <div className="mb-8">
@@ -364,6 +404,60 @@ export function MovieDetailView({ movieId, onClose, showLikedBy = true, sessionC
           ) : null}
         </div>
       </DrawerContent>
+
+      <Dialog open={showWizarrDialog} onOpenChange={(open: boolean) => {
+        setShowWizarrDialog(open);
+        if (!open) {
+          setWizSuccess(null);
+          setWizError("");
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{wizSuccess ? "Account Created!" : "Get Jellyfin Access"}</DialogTitle>
+            <DialogDescription>
+              {wizSuccess
+                ? "Your temporary guest account (valid for 2 days) has been created successfully."
+                : "Create a temporary guest account to watch movies. This account will expire in 2 days and does not include download privileges."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {wizSuccess ? (
+            <div className="space-y-4 py-4">
+              <div className="rounded-lg border bg-muted p-4">
+                <div className="font-semibold mb-2">Your Credentials</div>
+                <div className="text-sm"><span className="text-muted-foreground mr-2">Username:</span> {wizSuccess.username}</div>
+                <div className="text-sm"><span className="text-muted-foreground mr-2">Server URL:</span> <a href={wizSuccess.url} target="_blank" className="text-primary underline">{wizSuccess.url}</a></div>
+              </div>
+              <Button className="w-full" onClick={() => setShowWizarrDialog(false)}>Close</Button>
+            </div>
+          ) : (
+            <form onSubmit={handleWizarrSubmit} className="space-y-4 py-4">
+              {wizError && (
+                <div className="text-sm text-destructive font-medium p-2 bg-destructive/10 rounded">
+                  {wizError}
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="wiz-email">Email</Label>
+                <Input id="wiz-email" type="email" required value={wizEmail} onChange={e => setWizEmail(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="wiz-username">Username</Label>
+                <Input id="wiz-username" type="text" required value={wizUsername} onChange={e => setWizUsername(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="wiz-password">Password</Label>
+                <PasswordInput value={wizPassword} onChange={e => setWizPassword(e.target.value)} />
+              </div>
+              <DialogFooter className="mt-6">
+                <Button type="button" variant="outline" onClick={() => setShowWizarrDialog(false)}>Cancel</Button>
+                <Button type="submit" disabled={wizLoading}>{wizLoading ? "Creating..." : "Create Account"}</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </Drawer>
   );
 }

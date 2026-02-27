@@ -31,6 +31,10 @@ services:
       # IMPORTANT: When using a reverse proxy, ensure it passes the "Host" header.
       - USE_SECURE_COOKIES=false
       
+      # WIZARR configuration for guest access
+      - WIZARR_URL=
+      - WIZARR_API_KEY=
+      
       # OPTIONAL: Custom base path for the application (e.g. /swipe)
       # IMPORTANT: This must be set at BUILD TIME via --build-arg, not just as a
       # runtime environment variable. The prebuilt image does not support this.
