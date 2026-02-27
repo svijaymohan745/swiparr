@@ -12,16 +12,17 @@ import { SessionCodeSection } from "./SessionCodeSection";
 import { MatchesList } from "./MatchesList";
 import { SessionAlert } from "./SessionAlert";
 import { getErrorMessage } from "@/lib/utils";
+import { WizarrAccessButton } from "../wizarr/WizarrAccessButton";
 import { getRuntimeConfig } from "@/lib/runtime-config";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useSettings } from "@/lib/settings";
-import { 
-  useSession, 
-  useMembers, 
-  useMatches, 
-  useCreateSession, 
-  useJoinSession, 
-  useLeaveSession 
+import {
+    useSession,
+    useMembers,
+    useMatches,
+    useCreateSession,
+    useJoinSession,
+    useLeaveSession
 } from "@/hooks/api";
 import { apiClient } from "@/lib/api-client";
 import { SecureContextCopyFallback } from "../SecureContextCopyFallback";
@@ -200,45 +201,50 @@ export default function SessionContent() {
                 value={fallbackValue}
             />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="absolute left-6">
-                <Button variant="ghost" size="icon" className="text-foreground size-10 hover:bg-muted/30!">
-                    <Users className="size-5" />
-                </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-md w-full px-4 gap-2">
-                <SessionHeader
-                    activeCode={activeCode}
-                    members={members}
-                    currentSettings={sessionStatus?.settings || undefined}
-                />
-                <div className="px-1 w-full h-20 items-center grid">
-                    <SessionAlert />
-                </div>
-                <div className="space-y-6 px-1">
-                    <SessionCodeSection
+                <SheetTrigger asChild className="absolute left-6">
+                    <Button variant="ghost" size="icon" className="text-foreground size-10 hover:bg-muted/30!">
+                        <Users className="size-5" />
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="sm:max-w-md w-full px-4 gap-2">
+                    <SessionHeader
                         activeCode={activeCode}
-                        inputCode={inputCode}
-                        setInputCode={setInputCode}
-                        handleJoinSession={handleJoinSession}
-                        handleCreateSession={handleCreateSession}
-                        handleShare={handleShare}
-                        handleLeaveSession={handleLeaveSession}
-                        isJoining={joinSession.isPending}
-                        isCreating={createSession.isPending}
-                        isLeaving={leaveSession.isPending}
+                        members={members}
+                        currentSettings={sessionStatus?.settings || undefined}
                     />
-                    <MatchesList
-                        activeCode={activeCode}
-                        matches={matches}
-                        openMovie={openMovie}
+                    <div className="px-1 w-full h-20 items-center grid">
+                        <SessionAlert />
+                    </div>
+                    <div className="space-y-6 px-1">
+                        <SessionCodeSection
+                            activeCode={activeCode}
+                            inputCode={inputCode}
+                            setInputCode={setInputCode}
+                            handleJoinSession={handleJoinSession}
+                            handleCreateSession={handleCreateSession}
+                            handleShare={handleShare}
+                            handleLeaveSession={handleLeaveSession}
+                            isJoining={joinSession.isPending}
+                            isCreating={createSession.isPending}
+                            isLeaving={leaveSession.isPending}
+                        />
+                        <MatchesList
+                            activeCode={activeCode}
+                            matches={matches}
+                            openMovie={openMovie}
+                        />
+                    </div>
+                    {sessionStatus?.isGuest && (
+                        <div className="absolute bottom-28 left-6 w-[calc(100%-3rem)]">
+                            <WizarrAccessButton className="w-full" size="lg" />
+                        </div>
+                    )}
+                    <RandomMovieButton
+                        items={matches}
+                        className="absolute bottom-10 right-10"
                     />
-                </div>
-                <RandomMovieButton
-                    items={matches}
-                    className="absolute bottom-10 right-10"
-                />
-            </SheetContent>
-        </Sheet>
+                </SheetContent>
+            </Sheet>
         </>
     );
 }

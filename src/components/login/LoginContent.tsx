@@ -302,7 +302,9 @@ export default function LoginContent() {
         title="Quick Connect Code"
         value={qcCode || ""}
       />
-      <Image src={logo} alt="Logo" className="h-16 w-auto absolute top-16 drop-shadow-[0_0_20px_rgba(76,175,80,0.6)]" loading="eager" />
+      <div className="w-full max-w-sm flex justify-center mb-6">
+        <Image src={logo} alt="Logo" className="h-[72px] w-auto drop-shadow-[0_0_20px_rgba(76,175,80,0.6)]" loading="eager" />
+      </div>
       <Card className={cn("w-full border-border bg-card text-card-foreground pt-8", !providerLock ? "max-w-sm" : "max-w-xs")}>
         <CardContent className={cn("transition-all duration-300 h-auto", !providerLock && "px-5")}>
           {wasMadeAdmin ? (

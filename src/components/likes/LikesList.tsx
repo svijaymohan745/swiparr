@@ -8,7 +8,8 @@ import { useMovieDetail } from "../movie/MovieDetailProvider";
 import { MovieListItem } from "../movie/MovieListItem";
 import { RandomMovieButton } from "../movie/RandomMovieButton";
 import { type MergedLike } from "@/types";
-import { useLikes } from "@/hooks/api";
+import { useLikes, useSession } from "@/hooks/api";
+import { WizarrAccessButton } from "../wizarr/WizarrAccessButton";
 
 import {
     Empty,
@@ -25,6 +26,7 @@ export function LikesList() {
     const { openMovie } = useMovieDetail();
 
     const { data: likes, isLoading } = useLikes(sortBy, filterMode);
+    const { data: sessionStatus } = useSession();
 
     return (
         <div className="relative w-full mx-auto h-[calc(100svh-115px)] flex flex-col">
@@ -60,20 +62,26 @@ export function LikesList() {
                     </div>
                 )}
                 <div className="mt-7 mb-14">
-                {likes?.map((movie: MergedLike) => (
-                    <MovieListItem
-                        key={`${movie.Id}-${movie.sessionCode ?? 'solo'}`}
-                        movie={movie}
-                        onClick={() => openMovie(movie.Id, { sessionCode: movie.sessionCode })}
-                        isLiked={true}
-                    />
-                ))}
+                    {likes?.map((movie: MergedLike) => (
+                        <MovieListItem
+                            key={`${movie.Id}-${movie.sessionCode ?? 'solo'}`}
+                            movie={movie}
+                            onClick={() => openMovie(movie.Id, { sessionCode: movie.sessionCode })}
+                            isLiked={true}
+                        />
+                    ))}
                 </div>
             </ScrollArea>
 
-            <RandomMovieButton 
-                items={likes} 
-                className="absolute bottom-5 right-5 z-3" 
+            {sessionStatus?.isGuest && (
+                <div className="absolute bottom-5 left-5 right-20 z-10 w-[60%]">
+                    <WizarrAccessButton className="w-full shadow-lg" size="lg" />
+                </div>
+            )}
+
+            <RandomMovieButton
+                items={likes}
+                className="absolute bottom-5 right-5 z-3"
             />
         </div>
     )
