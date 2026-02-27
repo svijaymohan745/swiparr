@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  swiparr:
+    image: ghcr.io/svijaymohan745/swiparr:latest
+    container_name: swiparr
+    restart: unless-stopped
+
+    environment:
+      # Jellyfin Details
+      - JELLYFIN_URL=http://YOUR_SERVER_IP:8096
+      - JELLYFIN_PUBLIC_URL=https://your-public-domain.com
+      - JELLYFIN_USE_WATCHLIST=true
+      - ADMIN_USERNAME=admin
+      
+      # Swiparr Auth Security
+      - USE_SECURE_COOKIES=false
+      - AUTH_SECRET=REPLACE_THIS_WITH_A_RANDOM_32_CHAR_STRING
+      
+      # Wizarr Integration (Optional)
+      - WIZARR_URL=http://YOUR_WIZARR_IP_OR_URL_HERE:5690
+      - WIZARR_API_KEY=your_wizarr_api_key_here
+
+    volumes:
+      - /opt/docker/swiparr/data:/app/data
+
+    ports:
+      - "4321:4321"
