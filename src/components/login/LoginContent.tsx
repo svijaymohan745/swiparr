@@ -302,92 +302,94 @@ export default function LoginContent() {
         title="Quick Connect Code"
         value={qcCode || ""}
       />
-      <div className="w-full max-w-sm flex justify-center mb-6">
-        <Image src={logo} alt="Logo" className="h-[72px] w-auto drop-shadow-[0_0_20px_rgba(76,175,80,0.6)]" loading="eager" />
+      <div className="w-full flex flex-col items-center justify-center relative z-10">
+        <div className="w-full max-w-sm flex justify-center mb-6">
+          <Image src={logo} alt="Logo" className="h-[72px] w-auto drop-shadow-[0_0_20px_rgba(76,175,80,0.6)]" loading="eager" />
+        </div>
+        <Card className={cn("w-full border-border bg-card text-card-foreground pt-8", !providerLock ? "max-w-sm" : "max-w-xs")}>
+          <CardContent className={cn("transition-all duration-300 h-auto", !providerLock && "px-5")}>
+            {wasMadeAdmin ? (
+              <AdminInitializedView onContinue={() => {
+                const callbackUrl = searchParams.get("callbackUrl") || `${basePath}/`;
+                window.location.href = callbackUrl;
+              }} />
+            ) : (
+              <div className="space-y-4">
+                {!providerLock && (
+                  <Tabs value={selectedProvider} onValueChange={setSelectedProvider} className="w-full">
+                    <TabsList className="grid w-full grid-cols-4 h-9">
+                      <TabsTrigger value={ProviderType.JELLYFIN} className="text-xs font-semibold">
+                        <SiJellyfin />
+                        Jellyfin
+                      </TabsTrigger>
+                      <TabsTrigger value={ProviderType.EMBY} className="text-xs font-semibold">
+                        <SiEmby />
+                        Emby
+                      </TabsTrigger>
+                      <TabsTrigger value={ProviderType.PLEX} className="text-xs font-semibold">
+                        <SiPlex />
+                        Plex
+                      </TabsTrigger>
+                      <TabsTrigger value={ProviderType.TMDB} className="text-xs font-semibold">
+                        <SiThemoviedatabase />
+                        TMDB
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                )}
+
+                {selectedProvider === ProviderType.TMDB ? (
+                  <UniversalView
+                    providerLock={providerLock}
+                    tmdbToken={tmdbToken}
+                    setTmdbToken={setTmdbToken}
+                    username={username}
+                    setUsername={setUsername}
+                    loading={loading}
+                    handleLogin={handleLogin}
+                    isJoining={!!sessionCodeParam}
+                    onProfilePictureChange={setProfilePicture}
+                  />
+                ) : (
+                  <AuthView
+                    provider={selectedProvider}
+                    providerLock={providerLock}
+                    serverUrl={serverUrl}
+                    setServerUrl={setServerUrl}
+                    username={username}
+                    setUsername={setUsername}
+                    password={password}
+                    setPassword={setPassword}
+                    guestName={guestName}
+                    setGuestName={setGuestName}
+                    guestSessionCode={guestSessionCode}
+                    setGuestSessionCode={setGuestSessionCode}
+                    loading={loading}
+                    handleLogin={handleLogin}
+                    handleGuestLogin={handleGuestLogin}
+                    startQuickConnect={startQuickConnect}
+                    qcCode={qcCode}
+                    copied={copied}
+                    copyToClipboard={copyToClipboard}
+                    setQcCode={setQcCode}
+                    sessionCodeParam={sessionCodeParam}
+                    hasQuickConnect={capabilities.hasQuickConnect}
+                    isExperimental={providerLock ? capabilities.isExperimental : selectedProvider === ProviderType.EMBY}
+                    onProfilePictureChange={setProfilePicture}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    startPlexPinAuth={startPlexPinAuth}
+                    plexPinCode={plexPinCode}
+                    setPlexPinCode={setPlexPinCode}
+                    plexAuthUrl={plexAuthUrl}
+                  />
+                )}
+
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
-      <Card className={cn("w-full border-border bg-card text-card-foreground pt-8", !providerLock ? "max-w-sm" : "max-w-xs")}>
-        <CardContent className={cn("transition-all duration-300 h-auto", !providerLock && "px-5")}>
-          {wasMadeAdmin ? (
-            <AdminInitializedView onContinue={() => {
-              const callbackUrl = searchParams.get("callbackUrl") || `${basePath}/`;
-              window.location.href = callbackUrl;
-            }} />
-          ) : (
-            <div className="space-y-4">
-              {!providerLock && (
-                <Tabs value={selectedProvider} onValueChange={setSelectedProvider} className="w-full">
-                  <TabsList className="grid w-full grid-cols-4 h-9">
-                    <TabsTrigger value={ProviderType.JELLYFIN} className="text-xs font-semibold">
-                      <SiJellyfin />
-                      Jellyfin
-                    </TabsTrigger>
-                    <TabsTrigger value={ProviderType.EMBY} className="text-xs font-semibold">
-                      <SiEmby />
-                      Emby
-                    </TabsTrigger>
-                    <TabsTrigger value={ProviderType.PLEX} className="text-xs font-semibold">
-                      <SiPlex />
-                      Plex
-                    </TabsTrigger>
-                    <TabsTrigger value={ProviderType.TMDB} className="text-xs font-semibold">
-                      <SiThemoviedatabase />
-                      TMDB
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              )}
-
-              {selectedProvider === ProviderType.TMDB ? (
-                <UniversalView
-                  providerLock={providerLock}
-                  tmdbToken={tmdbToken}
-                  setTmdbToken={setTmdbToken}
-                  username={username}
-                  setUsername={setUsername}
-                  loading={loading}
-                  handleLogin={handleLogin}
-                  isJoining={!!sessionCodeParam}
-                  onProfilePictureChange={setProfilePicture}
-                />
-              ) : (
-                <AuthView
-                  provider={selectedProvider}
-                  providerLock={providerLock}
-                  serverUrl={serverUrl}
-                  setServerUrl={setServerUrl}
-                  username={username}
-                  setUsername={setUsername}
-                  password={password}
-                  setPassword={setPassword}
-                  guestName={guestName}
-                  setGuestName={setGuestName}
-                  guestSessionCode={guestSessionCode}
-                  setGuestSessionCode={setGuestSessionCode}
-                  loading={loading}
-                  handleLogin={handleLogin}
-                  handleGuestLogin={handleGuestLogin}
-                  startQuickConnect={startQuickConnect}
-                  qcCode={qcCode}
-                  copied={copied}
-                  copyToClipboard={copyToClipboard}
-                  setQcCode={setQcCode}
-                  sessionCodeParam={sessionCodeParam}
-                  hasQuickConnect={capabilities.hasQuickConnect}
-                  isExperimental={providerLock ? capabilities.isExperimental : selectedProvider === ProviderType.EMBY}
-                  onProfilePictureChange={setProfilePicture}
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                  startPlexPinAuth={startPlexPinAuth}
-                  plexPinCode={plexPinCode}
-                  setPlexPinCode={setPlexPinCode}
-                  plexAuthUrl={plexAuthUrl}
-                />
-              )}
-
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </>
   );
 }

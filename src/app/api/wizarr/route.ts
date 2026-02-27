@@ -41,6 +41,8 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         duration: "2 days",
         server_ids: serverIds,
+        unlimited: false,
+        uses_global_setting: false
       })
     });
 
