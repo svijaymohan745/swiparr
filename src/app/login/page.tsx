@@ -1,4 +1,3 @@
-import { Footer } from "@/components/Footer";
 import LightRays from "@/components/ui/LightRays";
 import LoginContent from "@/components/login/LoginContent";
 import { Loader2 } from "lucide-react";
@@ -15,7 +14,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const join = params.join;
   const { basePath, appPublicUrl } = await getAsyncRuntimeConfig();
   const origin = appPublicUrl.startsWith('http') ? appPublicUrl : `https://${appPublicUrl}`;
-  
+
   if (join && typeof join === 'string') {
     const ogUrl = new URL(`${basePath}/api/og`, origin);
     ogUrl.searchParams.set('join', join);
@@ -58,7 +57,6 @@ export default function LoginPage() {
           <Loader2 className="animate-spin" />
         </div>}>
         <LoginContent />
-        <Footer className="pb-6 absolute bottom-5" />
         <div className="absolute w-full h-full top-0 left-0 -z-1">
           <LightRays
             followMouse={false}

@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const { basePath, appPublicUrl } = await getAsyncRuntimeConfig();
   const url = appPublicUrl.startsWith('http') ? appPublicUrl : `https://${appPublicUrl}`;
   const tagline = "Swipe on what to watch next, by yourself or together.";
-  
+
   return {
     metadataBase: new URL(url),
     title: {
@@ -49,8 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
     description: tagline,
     appleWebApp: { capable: true, title: "Swiparr", statusBarStyle: "black-translucent" },
     icons: {
-      icon: `${basePath}/favicon.ico`,     
-      shortcut: `${basePath}/icon1.png`,   
+      icon: `${basePath}/favicon.ico`,
+      shortcut: `${basePath}/icon1.png`,
       apple: `${basePath}/apple-icon.png`,
     },
     openGraph: {
@@ -85,12 +85,12 @@ export default async function RootLayout({
         </Suspense>
       </head>
       <body className={`${sansFlex.variable} ${jetbrainsMono.variable} overflow-y-hidden`}>
-        {useAnalytics && <Analytics/>}
+        {useAnalytics && <Analytics />}
 
         <Providers
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <TouchProvider>
