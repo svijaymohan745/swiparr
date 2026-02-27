@@ -1,0 +1,45 @@
+﻿{
+    "server_ids":  {
+                       "type":  "array",
+                       "description":  "Array of server IDs (required, but validated by API for better error messages)",
+                       "items":  {
+                                     "type":  "integer"
+                                 }
+                   },
+    "expires_in_days":  {
+                            "type":  "integer",
+                            "description":  "Days until invitation expires (1, 7, 30, or null)"
+                        },
+    "duration":  {
+                     "type":  "string",
+                     "description":  "User access duration in days or \"unlimited\"",
+                     "default":  "unlimited"
+                 },
+    "unlimited":  {
+                      "type":  "boolean",
+                      "description":  "Whether user access is unlimited",
+                      "default":  true
+                  },
+    "library_ids":  {
+                        "type":  "array",
+                        "description":  "Array of library IDs to grant access to",
+                        "items":  {
+                                      "type":  "integer"
+                                  }
+                    },
+    "allow_downloads":  {
+                            "type":  "boolean",
+                            "description":  "Allow user downloads",
+                            "default":  false
+                        },
+    "allow_live_tv":  {
+                          "type":  "boolean",
+                          "description":  "Allow live TV access",
+                          "default":  false
+                      },
+    "allow_mobile_uploads":  {
+                                 "type":  "boolean",
+                                 "description":  "Allow mobile uploads",
+                                 "default":  false
+                             }
+}

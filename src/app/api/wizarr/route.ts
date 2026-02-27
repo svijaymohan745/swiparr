@@ -39,10 +39,9 @@ export async function POST(req: Request) {
         'X-API-Key': wizarrApiKey
       },
       body: JSON.stringify({
-        duration: "2 days",
+        duration: "2",
         server_ids: serverIds,
-        unlimited: false,
-        uses_global_setting: false
+        unlimited: false
       })
     });
 
