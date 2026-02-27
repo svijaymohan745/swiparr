@@ -1,14 +1,8 @@
-name: Version and Publish
+name: Docker Publish
 
 on:
   push:
     branches: [master, develop]
-    paths-ignore:
-      - 'README.md'
-      - '.github/CONTRIBUTING.md'
-      - '.github/FUNDING.yml'
-      - 'LICENSE'
-      - '.gitignore'
   workflow_dispatch:
 
 env:
@@ -16,75 +10,8 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  release:
-    name: Semantic Release (master only)
-    if: github.ref_name == 'master' && github.repository != 'jakobbjelver/swiparr'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write   # required to create tags/releases
-      issues: write     # semantic-release/github may comment/link issues
-      pull-requests: write
-    outputs:
-      published: ${{ steps.semrel.outputs.new_release_published }}
-      version: ${{ steps.semrel.outputs.new_release_version }}
-      git_tag: ${{ steps.semrel.outputs.new_release_git_tag }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Semantic Release
-        id: semrel
-        uses: cycjimmy/semantic-release-action@v4
-        with:
-          semantic_version: 23
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  sync_fork:
-    name: Sync fork (only when a release is published)
-    needs: release
-    if: needs.release.outputs.published == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false   # don't keep GITHUB_TOKEN auth header
-      - name: Sync fork (master + tags)
-        env:
-          SYNC_TOKEN: ${{ secrets.FORK_SYNC_TOKEN }}
-        run: |
-          # Add fork remote using PAT
-          git remote add fork "https://jakobbjelver:${SYNC_TOKEN}@github.com/jakobbjelver/swiparr.git"
-
-          # Sync master branch
-          git push fork HEAD:master --force
-
-          # Sync tags
-          git push fork --tags --force
-
-  # Build each platform on its own native runner (no QEMU emulation).
-  # Each job pushes a digest-only image (no tag) and uploads its digest
-  # as an artifact for the merge job below.
   build:
     name: Build image (${{ matrix.platform }})
-    needs: [release, sync_fork]
-    if: |
-      always() &&
-      (
-        github.ref_name == 'develop' ||
-        (github.ref_name == 'master' && needs.release.outputs.published == 'true')
-      ) &&
-      (needs.release.result == 'success' || needs.release.result == 'skipped') &&
-      (needs.sync_fork.result == 'success' || needs.sync_fork.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
@@ -98,8 +25,6 @@ jobs:
       packages: write
       contents: read
     outputs:
-      # Both matrix legs write to the same output key; GitHub keeps only the
-      # last-written value, so we pass digests via artifacts instead.
       image: ${{ steps.build.outputs.imageid }}
     steps:
       - name: Compute short sha
@@ -108,7 +33,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.ref_name == 'master' && needs.release.outputs.git_tag || github.sha }}
 
       - uses: docker/setup-buildx-action@v3
 
@@ -130,13 +54,12 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
-          # Push a tagless digest so we can assemble the manifest in the next job
           outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
           build-args: |
-            APP_VERSION=${{ github.ref_name == 'master' && format('v{0}', needs.release.outputs.version) || format('dev-{0}', env.SHORT_SHA) }}
+            APP_VERSION=${{ github.ref_name == 'master' && 'latest' || format('dev-{0}', env.SHORT_SHA) }}
 
       - name: Export digest
         run: |
@@ -152,10 +75,9 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  # Merge the two platform digests into a single multi-arch manifest and apply tags.
   merge:
     name: Merge multi-arch manifest
-    needs: [release, build]
+    needs: [build]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -185,12 +107,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # Stable channel (master releases only)
             type=raw,value=latest,enable=${{ github.ref_name == 'master' }}
-            type=raw,value=v${{ needs.release.outputs.version }},enable=${{ github.ref_name == 'master' }}
-            type=raw,value=${{ needs.release.outputs.version }},enable=${{ github.ref_name == 'master' }}
-
-            # Dev channel (develop only)
             type=raw,value=dev,enable=${{ github.ref_name == 'develop' }}
             type=raw,value=dev-${{ env.SHORT_SHA }},enable=${{ github.ref_name == 'develop' }}
 
